@@ -1,0 +1,66 @@
+= Circuit Breaker - WildFly Swarm Booster
+
+IMPORTANT: This runs best when deployed to OpenShift in order to use the circuit breaker functionality. For more details on using this booster with a single-node OpenShift cluster, CI/CD deployments, as well as the rest of the runtime, see the link:http://appdev.openshift.io/docs/wf-swarm-runtime.html[WildFly Swarm Runtime Guide].
+
+IMPORTANT: This booster requires Java 8 JDK or greater and Maven 3.3.x.
+
+IMPORTANT: As part of the process of creating this booster, launch.openshift.io set up a project with a CI/CD deployment of this booster. You can see the status of this deployment in your Single-node OpenShift Cluster or OpenShift Online Web Console. 
+
+== Running the Booster on a Single-node OpenShift Cluster
+If you have a single-node OpenShift cluster, such as Minishift or the Red Hat Container Development Kit, link:http://appdev.openshift.io/docs/minishift-installation.html[installed and running], you can also deploy your booster there. A single-node OpenShift cluster provides you with access to a cloud environment that is similar to a production environment.
+
+To deploy your booster to a running single-node OpenShift cluster:
+
+. Log in and create your project.
++
+[source,bash,options="nowrap",subs="attributes+"]
+----
+$ git clone git@github.com:tqvarnst/wf-cb-01
+
+$ cd wf-cb-01
+
+$ oc login -u developer -p developer
+
+$ oc new-project MY_PROJECT_NAME
+
+$ mvn clean fabric8:deploy -Popenshift
+----
+
+
+== Interacting with the Booster on a Single-node OpenShift Cluster
+
+To interact with your booster while it's running on a Single-node OpenShift Cluster, you first need to obtain it's URL:
+
+[source,bash,options="nowrap",subs="attributes+"]
+----
+$ oc get route greeting-service -o jsonpath={$.spec.host}
+
+greeting-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME
+
+$ oc get route name-service -o jsonpath={$.spec.host}
+
+name-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME
+----
+
+
+You can use the form at your application's url or you can use the `curl` command:
+
+
+[source,bash,options="nowrap",subs="attributes+"]
+----
+$ curl http://greeting-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME/api/greeting
+{"content":"Hello, World!"}
+
+$ curl -X PUT -H "Content-Type: application/json" -d '{"state": "fail"}' http://name-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME/api/state
+
+$ curl http://greeting-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME/api/greeting
+{"content":"Hello, Fallback!"}
+
+$ curl -X PUT -H "Content-Type: application/json" -d '{"state": "ok"}' http://name-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME/api/state
+
+$ curl http://greeting-service-MY_PROJECT_NAME.LOCAL_OPENSHIFT_HOSTNAME/api/greeting
+{"content":"Hello, World!"}
+----
+
+== More Information
+You can learn more about this booster and rest of the WildFly Swarm runtime in the link:http://appdev.openshift.io/docs/wf-swarm-runtime.html[WildFly Swarm Runtime Guide].

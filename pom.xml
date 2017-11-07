@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ ~ Copyright 2016-2017 Red Hat, Inc, and individual contributors. ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License"); ~ you may
+   not use this file except in compliance with the License. ~ You may obtain
+   a copy of the License at ~ ~ http://www.apache.org/licenses/LICENSE-2.0 ~
+   ~ Unless required by applicable law or agreed to in writing, software ~ distributed
+   under the License is distributed on an "AS IS" BASIS, ~ WITHOUT WARRANTIES
+   OR CONDITIONS OF ANY KIND, either express or implied. ~ See the License for
+   the specific language governing permissions and ~ limitations under the License.
+   ~ --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>io.openshift</groupId>
+      <artifactId>booster-parent</artifactId>
+      <version>10</version>
+   </parent>
+
+   <groupId>io.openshift.booster</groupId>
+   <artifactId>booster-circuit-breaker-wildfly-swarm</artifactId>
+   <version>1.0.0-SNAPSHOT</version>
+   <packaging>pom</packaging>
+
+   <name>WildFly Swarm - Circuit Breaker Booster</name>
+
+   <properties>
+      <version.wildfly.swarm>7.0.0.redhat-6</version.wildfly.swarm>
+      <version.resteasy>3.0.19.Final</version.resteasy>
+      <version.override.jackson>2.7.7</version.override.jackson>
+      <version.javax.json>1.0.4</version.javax.json>
+      <version.junit>4.12</version.junit>
+      <!-- Licenses - plugins -->
+      <version.wildfly.swarm.fraction.plugin>61</version.wildfly.swarm.fraction.plugin>
+      <version.xml-maven-plugin>1.0.1</version.xml-maven-plugin>
+      <version.license-maven-plugin>1.13</version.license-maven-plugin>
+      <version.wildfly-licenses-plugin>1.0.1</version.wildfly-licenses-plugin>
+      <!-- Licenses - JBoss repo URL used in custom-settings -->
+      <jboss.repo.url>https://maven.repository.redhat.com/ga/</jboss.repo.url>
+      <licenses.pom.file>pom.xml</licenses.pom.file>
+   </properties>
+
+   <modules>
+      <module>name-service</module>
+      <module>greeting-service</module>
+      <module>tests</module>
+   </modules>
+
+   <dependencyManagement>
+      <dependencies>
+
+         <dependency>
+            <groupId>org.wildfly.swarm</groupId>
+            <artifactId>bom</artifactId>
+            <version>${version.wildfly.swarm}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+
+         <dependency>
+            <groupId>org.wildfly.swarm</groupId>
+            <artifactId>bom-certified</artifactId>
+            <version>${version.wildfly.swarm}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+
+         <dependency>
+            <groupId>org.jboss.arquillian.junit</groupId>
+            <artifactId>arquillian-junit-container</artifactId>
+            <version>1.1.12.Final</version>
+            <scope>test</scope>
+         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.1</version>
+            <scope>test</scope>
+        </dependency>
+
+      </dependencies>
+   </dependencyManagement>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.wildfly.swarm</groupId>
+            <artifactId>wildfly-swarm-plugin</artifactId>
+            <version>${version.wildfly.swarm}</version>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>package</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+
+         <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+               <failOnMissingWebXml>false</failOnMissingWebXml>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
+
+   <repositories>
+      <repository>
+         <releases>
+         </releases>
+         <snapshots>
+            <enabled>false</enabled>
+         </snapshots>
+         <id>jboss-enterprise-maven-repository</id>
+         <url>https://maven.repository.redhat.com/ga/</url>
+      </repository>
+      <repository>
+         <releases>
+         </releases>
+         <snapshots>
+            <enabled>false</enabled>
+         </snapshots>
+         <id>jboss-enterprise-maven-repository-earlyaccess</id>
+         <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+      </repository>
+   </repositories>
+   <pluginRepositories>
+      <pluginRepository>
+         <releases>
+         </releases>
+         <snapshots>
+            <enabled>false</enabled>
+         </snapshots>
+         <id>jboss-enterprise-maven-repository</id>
+         <url>https://maven.repository.redhat.com/ga/</url>
+      </pluginRepository>
+      <pluginRepository>
+         <releases>
+         </releases>
+         <snapshots>
+            <enabled>false</enabled>
+         </snapshots>
+         <id>jboss-enterprise-maven-repository-earlyaccess</id>
+         <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+      </pluginRepository>
+   </pluginRepositories>
+
+
+</project>

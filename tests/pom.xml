@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ ~ Copyright 2016-2017 Red Hat, Inc, and individual contributors. ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License"); ~ you may
+   not use this file except in compliance with the License. ~ You may obtain
+   a copy of the License at ~ ~ http://www.apache.org/licenses/LICENSE-2.0 ~
+   ~ Unless required by applicable law or agreed to in writing, software ~ distributed
+   under the License is distributed on an "AS IS" BASIS, ~ WITHOUT WARRANTIES
+   OR CONDITIONS OF ANY KIND, either express or implied. ~ See the License for
+   the specific language governing permissions and ~ limitations under the License.
+   ~ --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>io.openshift.booster</groupId>
+      <artifactId>booster-circuit-breaker-wildfly-swarm</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+   </parent>
+
+   <artifactId>wfswarm-circuit-breaker-tests</artifactId>
+   <packaging>jar</packaging>
+
+   <name>WildFly Swarm - C/B Booster - Tests</name>
+
+   <properties>
+      <version.override.jackson>2.7.7</version.override.jackson>
+   </properties>
+
+   <dependencies>
+
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>${version.junit}</version>
+         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.glassfish</groupId>
+         <artifactId>javax.json</artifactId>
+         <version>${version.javax.json}</version>
+         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>io.openshift.booster</groupId>
+         <artifactId>wfswarm-circuit-breaker-name</artifactId>
+         <version>${project.version}</version>
+         <type>war</type>
+         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>io.openshift.booster</groupId>
+         <artifactId>wfswarm-circuit-breaker-greeting</artifactId>
+         <version>${project.version}</version>
+         <type>war</type>
+         <scope>test</scope>
+      </dependency>
+
+   </dependencies>
+
+   <profiles>
+      <profile>
+         <id>openshift-it</id>
+         <build>
+            <plugins>
+               <!--
+                 - 1.
+                 -
+                 - For running the test, we need the Jackson dependencies in a higher version than what is brought in by Swarm.
+                 - Unfortunately, Failsafe can't be configured do add specific artifacts to the test classpath, just files,
+                 - so we need to download the dependencies manually. This is what this plugin execution does.
+                 -->
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-dependency-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <id>prepare-jackson-dependencies-for-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                           <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                           <stripVersion>true</stripVersion>
+                           <artifactItems>
+                              <artifactItem>
+                                 <groupId>com.fasterxml.jackson.core</groupId>
+                                 <artifactId>jackson-core</artifactId>
+                                 <version>${version.override.jackson}</version>
+                              </artifactItem>
+                              <artifactItem>
+                                 <groupId>com.fasterxml.jackson.core</groupId>
+                                 <artifactId>jackson-annotations</artifactId>
+                                 <version>${version.override.jackson}</version>
+                              </artifactItem>
+                              <artifactItem>
+                                 <groupId>com.fasterxml.jackson.core</groupId>
+                                 <artifactId>jackson-databind</artifactId>
+                                 <version>${version.override.jackson}</version>
+                              </artifactItem>
+                           </artifactItems>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-failsafe-plugin</artifactId>
+                  <configuration>
+                     <!--
+                       - 2.
+                       -
+                       - These artifacts are added to the test classpath automatically because they are project dependencies.
+                       - However, they are of too old versions, so we remove them here and add correct versions later.
+                       -->
+                     <classpathDependencyExcludes>
+                        <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
+                        <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-annotations</classpathDependencyExclude>
+                        <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-databind</classpathDependencyExclude>
+                     </classpathDependencyExcludes>
+                     <!--
+                       - 3.
+                       -
+                       - And here, we add the correct versions of the artifacts to test classpath. Unfortunately,
+                       - this is only possible by file paths, not by artifact coordinates.
+                       -->
+                     <additionalClasspathElements>
+                        <additionalClasspathElement>${project.build.directory}/dependency/jackson-core.jar</additionalClasspathElement>
+                        <additionalClasspathElement>${project.build.directory}/dependency/jackson-annotations.jar</additionalClasspathElement>
+                        <additionalClasspathElement>${project.build.directory}/dependency/jackson-databind.jar</additionalClasspathElement>
+                     </additionalClasspathElements>
+
+                     <systemPropertyVariables>
+                        <nameServiceTemplate>${project.parent.basedir}/name-service/target/classes/META-INF/fabric8/openshift.yml</nameServiceTemplate>
+                        <greetingServiceTemplate>${project.parent.basedir}/greeting-service/target/classes/META-INF/fabric8/openshift.yml</greetingServiceTemplate>
+                     </systemPropertyVariables>
+                     
+                  </configuration>
+                  <executions>
+                     <execution>
+                        <goals>
+                           <goal>integration-test</goal>
+                           <goal>verify</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
+
+</project>
